@@ -29,7 +29,7 @@ use constant RULER_INTERVALS     => 20;
 use constant PAD_OVERVIEW_BOTTOM => 5;
 use constant TRY_CACHING_CONFIG  => 1;
 use constant MAX_PROCESSES       => 4;
-use constant MAX_TITLE_LEN       => 50;
+use constant MAX_TITLE_LEN       => 100;
 
 # when we load, we set a global indicating the LWP::UserAgent is available
 my $LPU_AVAILABLE;
