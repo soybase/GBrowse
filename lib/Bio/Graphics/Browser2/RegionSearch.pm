@@ -395,33 +395,48 @@ sub _search_features_locally {
                   :0} @dbids;
 
     warn "dbs = @dbids" if DEBUG;
-    my %seenit;
 
-    for my $dbid (@dbids) {
-	my $opts = $self->source->search_options($dbid);
-	next if $opts =~ /none/i && ($args->{-name}||'') !~ /^id:/;
-	warn "searching in ",$dbid if DEBUG;
-	my $db = $self->source->open_database($dbid);
-	next if $seenit{$db}++;
-	my $region   = Bio::Graphics::Browser2::Region->new(
-	    { source     => $self->source,
-	      state      => $self->state,
-	      db         => $db,
-	      searchopts => $opts,
-	    }
-	    ); 
-	my $features = $region->search_features($args);
-	warn $features && @$features ? "[$$] got @$features" : "[$$] got no features" if DEBUG;
-	next unless $features && @$features;
-	$features = $self->filter_features($dbid,$features);
-	$self->add_dbid_to_features($dbid,$features);
-	push @found,@$features;
-	
-	if ($dbid eq $default_dbid && $shortcircuit) {
-	    warn "hit @found in the default database, so short-circuiting" if DEBUG;
-	    last;
-	}
-	    
+
+SEARCH: for my $exact_search ((1,0)) {
+        my %seenit;
+        for my $dbid (@dbids) {
+            my $opts = $self->source->search_options($dbid);
+            next if $opts =~ /none/i && ($args->{-name}||'') !~ /^id:/;
+            warn "searching in ",$dbid if DEBUG;
+            my $db = $self->source->open_database($dbid);
+            next if $seenit{$db}++;
+            if ($exact_search) { # if only exact searching this time
+               my $searchopts = Bio::Graphics::Browser2::Region->parse_searchopts($opts);
+               if ($searchopts->{exact}) { 
+                   $opts = 'exact';
+                   if ($searchopts->{wildcard}) {
+                       $opts .= ' wildcard';
+                   }
+               } else {
+                   next; # skip this database
+               }
+            }
+            my $region   = Bio::Graphics::Browser2::Region->new(
+                { source     => $self->source,
+                  state      => $self->state,
+                  db         => $db,
+                  searchopts => $opts,
+                }
+                ); 
+            my $features = $region->search_features($args);
+            warn $features && @$features ? "[$$] got @$features" : "[$$] got no features" if DEBUG;
+            next unless $features && @$features;
+            $features = $self->filter_features($dbid,$features);
+            $self->add_dbid_to_features($dbid,$features);
+            push @found,@$features;
+            
+            if ($dbid eq $default_dbid && $shortcircuit) {
+                warn "hit @found in the default database, so short-circuiting" if DEBUG;
+                last SEARCH;
+            }
+            
+        }
+        last SEARCH if @found; # if any hits found through exact searching, short circuit
     }
 
     return \@found;		
