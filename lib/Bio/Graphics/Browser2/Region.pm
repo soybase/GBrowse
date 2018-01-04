@@ -463,7 +463,7 @@ sub is_chromosome_region {
     my $self = shift;
     my $name = shift;
     if ( ($name !~ /\.\./ and $name =~ /([\w._\/-]+):\s*(-?[-e\d.]+)\s*,\s*(-?[-e\d.]+)\s*$/) or
-	 $name =~ /([\w._\/-]+):\s*(-?[-e\d,.]+?)\s*(?:-|\.\.)\s*(-?[-e\d,.]+)\s*$/) {
+	 $name =~ /\s*([^:]+):\s*(-?[-e\d,.]+?)\s*(?:-|\.\.)\s*(-?[-e\d,.]+)\s*$/) {
 	my $ref  = $1;
 	my $start = $2;
 	my $stop  = $3;
