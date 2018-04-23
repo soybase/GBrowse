@@ -198,6 +198,10 @@ sub find {
     push @results, $alignment;
   }
   
+  # 2014-08-26: Per Julie Hofer's suggestion, show the karyotype view even if
+  # there is only one hit.
+  CGI::param( karyotype => 1);
+
   unlink $in_file;
   unlink $out_file;
   return (\@results, @results ? '' : 'No alignments found');
