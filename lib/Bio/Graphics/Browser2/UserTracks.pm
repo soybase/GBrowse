@@ -754,6 +754,10 @@ sub _guess_upload_type {
 	       :$filename =~ /\.(?:tar|tgz|tbz|tbz2|zip)(?:\.(gz|bz2))?$/i ? 'archive'
 	       :undef;
     
+    # 2014-03-13 (weeks): submitted bug report/patch for the following issue:
+    #  https://github.com/GMOD/GBrowse/issues/39
+    # .gff file may be GFF3 if first line contains the gff-version pragma
+    return ('gff3',\@lines,$eol) if $filename =~ /\.gff$/i && $lines[0] =~ /^\#\#gff-version\s+3/;
     return ($ftype,\@lines,$eol) if $ftype;
 
     # otherwise scan the thing until we find a pattern we know about
