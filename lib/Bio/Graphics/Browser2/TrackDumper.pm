@@ -774,7 +774,14 @@ sub print_feature {
     my $self = shift;
     my $f    = shift;
     eval { $f->version(3) };
-    my $s = $f->gff_string(1);    # the flag is for GFF3 subfeature recursion
+    # 2012-04-18: allow gbgff to accept a "no_subparts=1" URL parameter to
+    # suppress the display of subfeatures. This is useful for, e.g., dumping
+    # a large number of "gene" features when only the top-level "gene" features
+    # are desired, and not all the subfeatures, as dumping all the subfeatures 
+    # is slow.
+    # Bug report filed:
+    # https://sourceforge.net/tracker/?func=detail&aid=3519289&group_id=27707&atid=391291
+    my $s = $f->gff_string(param('no_subparts') ? 0 : 1);    # the flag is for GFF3 subfeature recursion
     chomp $s;
     if (my $prefix = $self->add_prefix) {
 	$s =~ s/^/$prefix/gm unless $s =~ /^$prefix/m;
