@@ -177,7 +177,9 @@ sub render_snapshots_listing {
 		-id=>$snapshot_name || 'snapshotname'},
 		$set_snapshot,
 		$delete_snapshot,
-		$send_snapshot,
+#2012-02-07: comment-out the "Send Snapshot" button until we get an answer from
+#            the GBrowse mailing list on what it does (or if it's broken)
+#		$send_snapshot,
 		$mail_snapshot,
 		$send_snapshot_dialog,
 		$mail_snapshot_dialog,
