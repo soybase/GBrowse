@@ -2358,7 +2358,8 @@ sub update_options {
                grid flip width region_size show_tooltips cache
                );
 
-  if (my @features = shellwords(multi_param('h_feat'))) {
+  if (my @features = multi_param('h_feat')) {
+      use Data::Dumper; print STDERR "features:" . Dumper(@features);
       $state->{h_feat} = {};
       for my $hilight (@features) {
 	  last if $hilight eq '_clear_';
