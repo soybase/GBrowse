@@ -837,7 +837,11 @@ sub render_body {
 
   my $main_page   .= $self->render_navbar($region->seg);
 
-  if ($region->feature_count > 1) {
+# 2014-08-26: If the karyotype parameter has been defined to force karyotype
+# display, do it only once. This is to facilitate the display of a single
+# alignment from the BLAT plugin in the karyotype view.
+  if ($region->feature_count > 1 || scalar(param('karyotype'))) {
+      CGI::delete('karyotype');
       $main_page .= $self->render_multiple_choices($features,$self->state->{name});
       $main_page .= $self->render_select_track_link;
   }
@@ -2359,7 +2363,6 @@ sub update_options {
                );
 
   if (my @features = multi_param('h_feat')) {
-      use Data::Dumper; print STDERR "features:" . Dumper(@features);
       $state->{h_feat} = {};
       for my $hilight (@features) {
 	  last if $hilight eq '_clear_';
@@ -2395,10 +2398,10 @@ sub update_tracks {
   my $self  = shift;
   my $state = shift;
 
-  if (my @add = multi_param('add')) {
-      my @style = multi_param('style');
-      $self->handle_quickie(\@add,\@style);
-  }
+# if (my @add = multi_param('add')) {
+#     my @style = multi_param('style');
+#     $self->handle_quickie(\@add,\@style);
+# }
 
   # selected tracks can be set by the 'l', 'label' or 't' parameter
   # the preferred parameter is 'l', because it implements correct
@@ -2442,6 +2445,13 @@ sub update_tracks {
       $self->set_tracks(@main_l);
   }
   
+# workaround for the following issue:
+# http://sourceforge.net/tracker/?func=detail&aid=3152153&group_id=27707&atid=391291
+  if (my @add = multi_param('add')) {
+      my @style = multi_param('style');
+      $self->handle_quickie(\@add,\@style);
+  }
+
   if (my @selected = $self->split_labels_correctly(multi_param('enable'))) {
       $self->add_track_to_state($_) foreach @selected;
   }
@@ -3135,7 +3145,7 @@ sub label2key {
   my $self  = shift;
   my $label = shift;
   my $source = $self->data_source;
-  my $key;
+  my $key = $source->setting($label => 'track label');
 
   # make URL labels a bit nicer
   if ($label =~ /^ftp|^http/) {
